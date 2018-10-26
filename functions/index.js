@@ -24,3 +24,20 @@ exports.projectCreated = functions.region('us-east1').firestore
 
         return createNotification(notification);
     });
+
+exports.userJoined = functions.region('us-east1').auth
+    .user()
+    .onCreate(user => {
+        return admin.firestore()
+            .collection('users').doc(user.uid).get()
+            .then(doc => {
+                const newUser = doc.data();
+                const notification = {
+                    content: 'Joined the party',
+                    user: `${newUser.firstName} ${newUser.lastName}`,
+                    time: admin.firestore.FieldValue.serverTimestamp(),
+                };
+
+                return createNotification(notification);
+            });
+    });
